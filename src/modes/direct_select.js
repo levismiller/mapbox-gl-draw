@@ -20,7 +20,7 @@ DirectSelect.fireUpdate = function() {
   });
 };
 
-DirectSelect.fireActionable = function (state) {
+DirectSelect.fireActionable = function(state) {
   this.setActionableState({
     combineFeatures: false,
     uncombineFeatures: false,
@@ -75,7 +75,7 @@ DirectSelect.pathsToCoordinates = function(featureId, paths) {
   return paths.map(coord_path => { return { feature_id: featureId, coord_path }; });
 };
 
-DirectSelect.onFeature = function (state, e) {
+DirectSelect.onFeature = function(state, e) {
   if (state.selectedCoordPaths.length === 0) this.startDragging(state, e);
   else this.stopDragging(state);
 };
@@ -164,7 +164,7 @@ DirectSelect.onSetup = function(opts) {
   return state;
 };
 
-DirectSelect.onStop = function () {
+DirectSelect.onStop = function() {
   doubleClickZoom.enable(this);
   this.clearSelectedCoordinates();
 };
@@ -213,7 +213,7 @@ DirectSelect.onMouseOut = function(state) {
   if (state.dragMoving) this.fireUpdate();
 };
 
-DirectSelect.onTouchStart = DirectSelect.onMouseDown = function (state, e) {
+DirectSelect.onTouchStart = DirectSelect.onMouseDown = function(state, e) {
   if (isVertex(e)) return this.onVertex(state, e);
   if (CommonSelectors.isActiveFeature(e)) return this.onFeature(state, e);
   if (isMidpoint(e)) return this.onMidpoint(state, e);
