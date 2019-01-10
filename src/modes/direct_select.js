@@ -81,7 +81,7 @@ DirectSelect.onFeature = function(state, e) {
 };
 
 DirectSelect.dragFeature = function(state, e, delta) {
-  let feature = this.getSelected();
+  const feature = this.getSelected();
   if (!(feature[0].properties && feature[0].properties.draggable !== undefined && !feature[0].properties.draggable)) {
     moveFeatures(this.getSelected(), delta);
     state.dragMoveLocation = e.lngLat;
@@ -94,7 +94,7 @@ DirectSelect.dragFeature = function(state, e, delta) {
 };
 
 DirectSelect.dragVertex = function(state, e, delta) {
-  let feature = this.getSelected();
+  const feature = this.getSelected();
   if (!(feature[0].properties && feature[0].properties.editVertices !== undefined && !feature[0].properties.editVertices)) {
     const selectedCoords = state.selectedCoordPaths.map(coord_path => state.feature.getCoordinate(coord_path));
     const selectedCoordPoints = selectedCoords.map(coords => ({
