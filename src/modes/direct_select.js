@@ -1,4 +1,4 @@
-const {noTarget, isOfMetaType, isInactiveFeature, isShiftDown} = require('../lib/common_selectors');
+const { noTarget, isOfMetaType, isInactiveFeature, isShiftDown } = require('../lib/common_selectors');
 const createSupplementaryPoints = require('../lib/create_supplementary_points');
 const constrainFeatureMovement = require('../lib/constrain_feature_movement');
 const doubleClickZoom = require('../lib/double_click_zoom');
@@ -32,6 +32,10 @@ DirectSelect.startDragging = function(state, e) {
   this.map.dragPan.disable();
   state.canDragMove = true;
   state.dragMoveLocation = e.lngLat;
+  this.map.fire(Constants.events.DRAG_START, {
+    action: Constants.updateActions.CHANGE_COORDINATES,
+    features: this.getSelected().map(f => f.toGeoJSON())
+  });
 };
 
 DirectSelect.stopDragging = function(state) {
@@ -39,9 +43,13 @@ DirectSelect.stopDragging = function(state) {
   state.dragMoving = false;
   state.canDragMove = false;
   state.dragMoveLocation = null;
+  this.map.fire(Constants.events.DRAG_STOP, {
+    action: Constants.updateActions.CHANGE_COORDINATES,
+    features: this.getSelected().map(f => f.toGeoJSON())
+  });
 };
 
-DirectSelect.onVertex = function (state, e) {
+DirectSelect.onVertex = function(state, e) {
   this.startDragging(state, e);
   const about = e.featureTarget.properties;
   const selectedIndex = state.selectedCoordPaths.indexOf(about.coord_path);
@@ -73,37 +81,48 @@ DirectSelect.onFeature = function(state, e) {
 };
 
 DirectSelect.dragFeature = function(state, e, delta) {
-  moveFeatures(this.getSelected(), delta);
-  state.dragMoveLocation = e.lngLat;
-};
+  let feature = this.getSelected();
+  if (!(feature[0].properties && feature[0].properties.draggable !== undefined && !feature[0].properties.draggable)) {
+    moveFeatures(this.getSelected(), delta);
+    state.dragMoveLocation = e.lngLat;
 
-DirectSelect.dragVertex = function(state, e, delta) {
-  const selectedCoords = state.selectedCoordPaths.map(coord_path => state.feature.getCoordinate(coord_path));
-  const selectedCoordPoints = selectedCoords.map(coords => ({
-    type: Constants.geojsonTypes.FEATURE,
-    properties: {},
-    geometry: {
-      type: Constants.geojsonTypes.POINT,
-      coordinates: coords
-    }
-  }));
-
-  const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
-  for (let i = 0; i < selectedCoords.length; i++) {
-    const coord = selectedCoords[i];
-    state.feature.updateCoordinate(state.selectedCoordPaths[i], coord[0] + constrainedDelta.lng, coord[1] + constrainedDelta.lat);
+    this.map.fire(Constants.events.DRAG_FEATURE, {
+      action: Constants.updateActions.CHANGE_COORDINATES,
+      features: feature.map(f => f.toGeoJSON())
+    });
   }
 };
 
-DirectSelect.clickNoTarget = function () {
+DirectSelect.dragVertex = function(state, e, delta) {
+  let feature = this.getSelected();
+  if (!(feature[0].properties && feature[0].properties.editVertices !== undefined && !feature[0].properties.editVertices)) {
+    const selectedCoords = state.selectedCoordPaths.map(coord_path => state.feature.getCoordinate(coord_path));
+    const selectedCoordPoints = selectedCoords.map(coords => ({
+      type: Constants.geojsonTypes.FEATURE,
+      properties: {},
+      geometry: {
+        type: Constants.geojsonTypes.POINT,
+        coordinates: coords
+      }
+    }));
+
+    const constrainedDelta = constrainFeatureMovement(selectedCoordPoints, delta);
+    for (let i = 0; i < selectedCoords.length; i++) {
+      const coord = selectedCoords[i];
+      state.feature.updateCoordinate(state.selectedCoordPaths[i], coord[0] + constrainedDelta.lng, coord[1] + constrainedDelta.lat);
+    }
+  }
+};
+
+DirectSelect.clickNoTarget = function() {
   this.changeMode(Constants.modes.SIMPLE_SELECT);
 };
 
-DirectSelect.clickInactive = function () {
+DirectSelect.clickInactive = function() {
   this.changeMode(Constants.modes.SIMPLE_SELECT);
 };
 
-DirectSelect.clickActiveFeature = function (state) {
+DirectSelect.clickActiveFeature = function(state) {
   state.selectedCoordPaths = [];
   this.clearSelectedCoordinates();
   state.feature.changed();
@@ -184,7 +203,7 @@ DirectSelect.onMouseMove = function(state, e) {
   if (isFeature && noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else if (onVertex && !noCoords) this.updateUIClasses({ mouse: Constants.cursors.MOVE });
   else this.updateUIClasses({ mouse: Constants.cursors.NONE });
-  this.stopDragging(state);
+  // this.stopDragging(state);
 };
 
 DirectSelect.onMouseOut = function(state) {
