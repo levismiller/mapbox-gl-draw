@@ -142,8 +142,6 @@ DirectSelect.onSetup = function(opts) {
     throw new TypeError('direct_select mode doesn\'t handle point features');
   }
 
-  console.log('setup', opts);
-
   const state = {
     featureId,
     feature,
