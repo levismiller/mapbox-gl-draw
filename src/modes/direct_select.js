@@ -20,7 +20,7 @@ DirectSelect.fireUpdate = function () {
   });
 };
 
-DirectSelect.fireActionable = function (state) {
+DirectSelect.fireActionable = function(state) {
   this.setActionableState({
     combineFeatures: false,
     uncombineFeatures: false,
@@ -28,7 +28,7 @@ DirectSelect.fireActionable = function (state) {
   });
 };
 
-DirectSelect.startDragging = function (state, e) {
+DirectSelect.startDragging = function(state, e) {
   this.map.dragPan.disable();
   state.canDragMove = true;
   state.dragMoveLocation = e.lngLat;
@@ -38,7 +38,7 @@ DirectSelect.startDragging = function (state, e) {
   });
 };
 
-DirectSelect.stopDragging = function (state) {
+DirectSelect.stopDragging = function(state) {
   this.map.dragPan.enable();
   state.dragMoving = false;
   state.canDragMove = false;
@@ -49,7 +49,7 @@ DirectSelect.stopDragging = function (state) {
   });
 };
 
-DirectSelect.onVertex = function (state, e) {
+DirectSelect.onVertex = function(state, e) {
   if (state.draggable) {
     this.startDragging(state, e);
     const about = e.featureTarget.properties;
@@ -65,7 +65,7 @@ DirectSelect.onVertex = function (state, e) {
   }
 };
 
-DirectSelect.onMidpoint = function (state, e) {
+DirectSelect.onMidpoint = function(state, e) {
   this.startDragging(state, e);
   const about = e.featureTarget.properties;
   state.feature.addCoordinate(about.coord_path, about.lng, about.lat);
@@ -77,12 +77,12 @@ DirectSelect.pathsToCoordinates = function (featureId, paths) {
   return paths.map(coord_path => { return { feature_id: featureId, coord_path }; });
 };
 
-DirectSelect.onFeature = function (state, e) {
+DirectSelect.onFeature = function(state, e) {
   if (state.selectedCoordPaths.length === 0) this.startDragging(state, e);
   else this.stopDragging(state);
 };
 
-DirectSelect.dragFeature = function (state, e, delta) {
+DirectSelect.dragFeature = function(state, e, delta) {
   let feature = this.getSelected();
   if (!(feature[0].properties && feature[0].properties.draggable !== undefined && !feature[0].properties.draggable)) {
     moveFeatures(this.getSelected(), delta);
@@ -95,7 +95,7 @@ DirectSelect.dragFeature = function (state, e, delta) {
   }
 };
 
-DirectSelect.dragVertex = function (state, e, delta) {
+DirectSelect.dragVertex = function(state, e, delta) {
   let feature = this.getSelected();
   if (!(feature[0].properties && feature[0].properties.draggable !== undefined && !feature[0].properties.draggable)) {
     const selectedCoords = state.selectedCoordPaths.map(coord_path => state.feature.getCoordinate(coord_path));
@@ -124,7 +124,7 @@ DirectSelect.clickInactive = function () {
   this.changeMode(Constants.modes.SIMPLE_SELECT);
 };
 
-DirectSelect.clickActiveFeature = function (state) {
+DirectSelect.clickActiveFeature = function(state) {
   state.selectedCoordPaths = [];
   this.clearSelectedCoordinates();
   state.feature.changed();
@@ -171,7 +171,7 @@ DirectSelect.onStop = function () {
   this.clearSelectedCoordinates();
 };
 
-DirectSelect.toDisplayFeatures = function (state, geojson, push) {
+DirectSelect.toDisplayFeatures = function(state, geojson, push) {
   if (state.featureId === geojson.properties.id) {
     geojson.properties.active = Constants.activeStates.ACTIVE;
     push(geojson);
@@ -187,7 +187,7 @@ DirectSelect.toDisplayFeatures = function (state, geojson, push) {
   this.fireActionable(state);
 };
 
-DirectSelect.onTrash = function (state) {
+DirectSelect.onTrash = function(state) {
   state.selectedCoordPaths.sort().reverse().forEach(id => state.feature.removeCoordinate(id));
   this.fireUpdate();
   state.selectedCoordPaths = [];
@@ -199,7 +199,7 @@ DirectSelect.onTrash = function (state) {
   }
 };
 
-DirectSelect.onMouseMove = function (state, e) {
+DirectSelect.onMouseMove = function(state, e) {
   // On mousemove that is not a drag, stop vertex movement.
   const isFeature = CommonSelectors.isActiveFeature(e);
   const onVertex = isVertex(e);
@@ -210,18 +210,18 @@ DirectSelect.onMouseMove = function (state, e) {
   // this.stopDragging(state);
 };
 
-DirectSelect.onMouseOut = function (state) {
+DirectSelect.onMouseOut = function(state) {
   // As soon as you mouse leaves the canvas, update the feature
   if (state.dragMoving) this.fireUpdate();
 };
 
-DirectSelect.onTouchStart = DirectSelect.onMouseDown = function (state, e) {
+DirectSelect.onTouchStart = DirectSelect.onMouseDown = function(state, e) {
   if (isVertex(e)) return this.onVertex(state, e);
   if (CommonSelectors.isActiveFeature(e)) return this.onFeature(state, e);
   if (isMidpoint(e)) return this.onMidpoint(state, e);
 };
 
-DirectSelect.onDrag = function (state, e) {
+DirectSelect.onDrag = function(state, e) {
   if (state.canDragMove !== true) return;
   state.dragMoving = true;
   e.originalEvent.stopPropagation();
@@ -236,20 +236,20 @@ DirectSelect.onDrag = function (state, e) {
   state.dragMoveLocation = e.lngLat;
 };
 
-DirectSelect.onClick = function (state, e) {
+DirectSelect.onClick = function(state, e) {
   if (noTarget(e)) return this.clickNoTarget(state, e);
   if (CommonSelectors.isActiveFeature(e)) return this.clickActiveFeature(state, e);
   if (isInactiveFeature(e)) return this.clickInactive(state, e);
   this.stopDragging(state);
 };
 
-DirectSelect.onTap = function (state, e) {
+DirectSelect.onTap = function(state, e) {
   if (noTarget(e)) return this.clickNoTarget(state, e);
   if (CommonSelectors.isActiveFeature(e)) return this.clickActiveFeature(state, e);
   if (isInactiveFeature(e)) return this.clickInactive(state, e);
 };
 
-DirectSelect.onTouchEnd = DirectSelect.onMouseUp = function (state) {
+DirectSelect.onTouchEnd = DirectSelect.onMouseUp = function(state) {
   if (state.dragMoving) {
     this.fireUpdate();
   }
