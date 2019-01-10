@@ -5027,10 +5027,6 @@ module.exports = {
     CREATE: 'draw.create',
     DELETE: 'draw.delete',
     UPDATE: 'draw.update',
-    DRAG_START: 'draw.dragstart',
-    DRAG_STOP: 'draw.dragstop',
-    DRAG_FEATURE: 'draw.dragfeature',
-    DRAG_VERTEX: 'draw.dragvertex',
     SELECTION_CHANGE: 'draw.selectionchange',
     MODE_CHANGE: 'draw.modechange',
     ACTIONABLE: 'draw.actionable',
@@ -6720,12 +6716,6 @@ DirectSelect.startDragging = function (state, e) {
   this.map.dragPan.disable();
   state.canDragMove = true;
   state.dragMoveLocation = e.lngLat;
-  this.map.fire(Constants.events.DRAG_START, {
-    action: Constants.updateActions.CHANGE_COORDINATES,
-    features: this.getSelected().map(function (f) {
-      return f.toGeoJSON();
-    })
-  });
 };
 
 DirectSelect.stopDragging = function (state) {
@@ -6733,12 +6723,6 @@ DirectSelect.stopDragging = function (state) {
   state.dragMoving = false;
   state.canDragMove = false;
   state.dragMoveLocation = null;
-  this.map.fire(Constants.events.DRAG_STOP, {
-    action: Constants.updateActions.CHANGE_COORDINATES,
-    features: this.getSelected().map(function (f) {
-      return f.toGeoJSON();
-    })
-  });
 };
 
 DirectSelect.onVertex = function (state, e) {
@@ -6783,12 +6767,6 @@ DirectSelect.dragFeature = function (state, e, delta) {
   if (!(feature[0].properties && feature[0].properties.draggable !== undefined && !feature[0].properties.draggable)) {
     moveFeatures(this.getSelected(), delta);
     state.dragMoveLocation = e.lngLat;
-    this.map.fire(Constants.events.DRAG_FEATURE, {
-      action: Constants.updateActions.CHANGE_COORDINATES,
-      features: feature.map(function (f) {
-        return f.toGeoJSON();
-      })
-    });
   }
 };
 
@@ -6910,7 +6888,8 @@ DirectSelect.onMouseMove = function (state, e) {
     mouse: Constants.cursors.MOVE
   });else this.updateUIClasses({
     mouse: Constants.cursors.NONE
-  }); // this.stopDragging(state);
+  });
+  this.stopDragging(state);
 };
 
 DirectSelect.onMouseOut = function (state) {
